@@ -1,7 +1,7 @@
 #!/bin/bash
 
-$arch=$1
-$num=$2
+arch=$1
+num=$2
 
 python main.py \
     --data_type birds \
