@@ -7,17 +7,17 @@ python main.py \
     --data_type birds \
     --num_classes 200 \
     --batch_size 80 \
-    --lr 1e-3 \
-    --epochs 10 \
+    --lr 0.001 \
+    --epochs 20 \
     --num_descriptive "$num" \
     --num_prototypes 202 \
     --results ./outputs \
-    --earlyStopping 10 \
+    --earlyStopping 20 \
     --use_scheduler \
     --arch "$arch" \
     --pretrained \
     --proto_depth 256 \
-    --warmup_time 4 \
+    --warmup_time 10 \
     --warmup \
     --prototype_activation_function log \
     --top_n_weight 0 \

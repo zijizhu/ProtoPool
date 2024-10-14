@@ -278,8 +278,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
             gumbel_scalar = lambda1(epoch) if args.pp_gumbel else 0
 
             if args.warmup and args.warmup_time == epoch:
-                if str(model.module.features).upper().startswith("DINOV2"):
-                    model.module.features.set_requires_grad()
+                if str(model.features).upper().startswith("DINOV2"):
+                    model.features.set_requires_grad()
                 else:
                     model.features.requires_grad_(True)
                 optimizer = joint_optimizer
