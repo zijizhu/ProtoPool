@@ -1,6 +1,8 @@
 from typing import List, Tuple
 
 import torch
+from functools import partial
+from vit_features import DINOv2BackboneExpanded
 import torch.nn as nn
 from torch.nn.parameter import Parameter
 import torch.nn.functional as F
@@ -31,7 +33,9 @@ base_architecture_to_features = {'resnet18': resnet18_features,
                                  'vgg16': vgg16_features,
                                  'vgg16_bn': vgg16_bn_features,
                                  'vgg19': vgg19_features,
-                                 'vgg19_bn': vgg19_bn_features}
+                                 'vgg19_bn': vgg19_bn_features,
+                                 'dinov2_vits_exp': partial(DINOv2BackboneExpanded, name="dinov2_vits14_reg4", n_splits=3),
+                                 'dinov2_vitb_exp': partial(DINOv2BackboneExpanded, name="dinov2_vitb14_reg4", n_splits=3),}
 
 
 class PrototypeChooser(nn.Module):
@@ -77,6 +81,10 @@ class PrototypeChooser(nn.Module):
         elif features_name.startswith('DENSE'):
             first_add_on_layer_in_channels = \
                 [i for i in self.features.modules() if isinstance(i, nn.BatchNorm2d)][-1].num_features
+        elif features_name == "DINOV2_VITS14_REG4":
+            first_add_on_layer_in_channels = 384
+        elif features_name == "DINOV2_VITB14_REG4":
+            first_add_on_layer_in_channels = 768
         else:
             raise Exception('other base base_architecture NOT implemented')
 

@@ -278,7 +278,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
             gumbel_scalar = lambda1(epoch) if args.pp_gumbel else 0
 
             if args.warmup and args.warmup_time == epoch:
-                model.features.requires_grad_(True)
+                if str(model.module.features).upper().startswith("DINOV2"):
+                    model.module.features.set_requires_grad()
+                else:
+                    model.features.requires_grad_(True)
                 optimizer = joint_optimizer
                 lr_scheduler = torch.optim.lr_scheduler.StepLR(
                     optimizer, step_size=5, gamma=0.1)
@@ -307,7 +310,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     # ===================forward=====================
                     prob, min_distances, proto_presence = model_multi(
                         data, gumbel_scale=gumbel_scalar)
-                    np.savez_compressed(f'{dir_checkpoint}/pp_{epoch * 80 + i}.pth', proto_presence.detach().cpu().numpy())
+                    # np.savez_compressed(f'{dir_checkpoint}/pp_{epoch * 80 + i}.pth', proto_presence.detach().cpu().numpy())
 
 
                     if args.mixup_data:
@@ -763,6 +766,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
             global_min_proto_dist[j] = batch_min_proto_dist_j
             global_min_fmap_patches[j] = batch_min_fmap_patch_j
+            continue
 
            # get the receptive field boundary of the image patch
             # that generates the representation
