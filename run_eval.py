@@ -65,6 +65,7 @@ if __name__ == "__main__":
         checkpoint = torch.load(args.resume, map_location='cpu')
     # ppnet.load_state_dict(checkpoint)
     ppnet.load_state_dict(checkpoint["model_state_dict"])
+    ppnet.img_size = args.input_size
 
     ppnet.to(device)
     ppnet.eval()
