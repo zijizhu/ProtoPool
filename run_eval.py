@@ -33,14 +33,14 @@ if __name__ == "__main__":
     parser.add_argument('--resume', type=str)
     args = parser.parse_args()
 
-    output_path = Path(f'outputs/{args.base_architecture}-{args.num_prototypes}')
+    output_path = Path(f'outputs/{args.arch}-{args.num_prototypes}')
     output_path.mkdir(parents=True, exist_ok=True)
     filename = 'eval_results.txt'
 
     img_size = args.input_size
     device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
 
-    base_architecture = args.base_architecture
+    base_architecture = args.arch
     prototype_shape = [args.num_prototypes, 64, 1, 1]
     num_classes = 200
     prototype_activation_function = 'log'
