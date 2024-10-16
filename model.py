@@ -178,6 +178,11 @@ class PrototypeChooser(nn.Module):
         else:
             x = x.sum(dim=-1)
         return x, min_distances, proto_presence  # [b,c,n] [b, p] [c, p, n]
+    
+    def push_forward(self, x):
+        distances = self.prototype_distances(x)
+        return None, self.distance_2_similarity(distances)
+
 
     def _l2_convolution(self, x):
         '''
