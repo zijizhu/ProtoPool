@@ -64,7 +64,7 @@ if __name__ == "__main__":
     if args.resume:
         checkpoint = torch.load(args.resume, map_location='cpu')
     # ppnet.load_state_dict(checkpoint)
-    ppnet.load_state_dict(checkpoint)
+    ppnet.load_state_dict(checkpoint["model_state_dict"])
 
     ppnet.to(device)
     ppnet.eval()
