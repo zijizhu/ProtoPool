@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import torch
 from functools import partial
-from vit_features import DINOv2BackboneExpanded
+from vit_features import DINOv2BackboneExpanded, DINOBackboneExpanded
 import torch.nn as nn
 from torch.nn.parameter import Parameter
 import torch.nn.functional as F
@@ -35,7 +35,11 @@ base_architecture_to_features = {'resnet18': resnet18_features,
                                  'vgg19': vgg19_features,
                                  'vgg19_bn': vgg19_bn_features,
                                  'dinov2_vits_exp': partial(DINOv2BackboneExpanded, name="dinov2_vits14_reg4", n_splits=3),
-                                 'dinov2_vitb_exp': partial(DINOv2BackboneExpanded, name="dinov2_vitb14_reg4", n_splits=3),}
+                                 'dinov2_vitb_exp': partial(DINOv2BackboneExpanded, name="dinov2_vitb14_reg4", n_splits=3),
+                                 'dino_vits16': partial(DINOBackboneExpanded, name="dino_vits16", n_splits=3),
+                                 'dino_vits8': partial(DINOBackboneExpanded, name="dino_vits8", n_splits=3),
+                                 'dino_vitb16': partial(DINOBackboneExpanded, name="dino_vitb16", n_splits=3),
+                                 'dino_vitb8': partial(DINOBackboneExpanded, name="dino_vitb8", n_splits=3)}
 
 
 class PrototypeChooser(nn.Module):
@@ -84,6 +88,12 @@ class PrototypeChooser(nn.Module):
         elif features_name == "DINOV2_VITS14_REG4":
             first_add_on_layer_in_channels = 384
         elif features_name == "DINOV2_VITB14_REG4":
+            first_add_on_layer_in_channels = 768
+        elif features_name.startswith('DINO_VITS'):
+            self.shallow_layer_idx = 0
+            first_add_on_layer_in_channels = 384
+        elif features_name.startswith('DINO_VITB'):
+            self.shallow_layer_idx = 0
             first_add_on_layer_in_channels = 768
         else:
             raise Exception('other base base_architecture NOT implemented')
