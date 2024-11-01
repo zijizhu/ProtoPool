@@ -7,12 +7,10 @@ import numpy as np
 import torch
 from dinov2.layers.block import Block, MemEffAttention
 from dinov2.models.vision_transformer import DinoVisionTransformer as Dinov2VisionTransformer
-from .dino_backbone.vision_transformer import VisionTransformer
+from dino_backbone.vision_transformer import VisionTransformer
 from einops import rearrange
 from torch import nn
 from logging import getLogger
-
-from .maskclip import clip
 
 logger = getLogger(__name__)
 
@@ -246,21 +244,3 @@ class DINOBackboneExpanded(nn.Module):
 
     def __repr__(self):
         return self.name
-
-
-class MaskCLIP(nn.Module):
-    """
-    Implementation adapted from https://github.com/mhamilton723/FeatUp/tree/main/featup/featurizers
-    """
-    def __init__(self, name: str = "ViT-B/16", pretrained=True):
-        super().__init__()
-        self.model, self.preprocess = clip.load(
-            name,
-            download_root=os.getenv('TORCH_HOME', os.path.join(os.path.expanduser('~'), '.cache', 'torch'))
-        )
-        self.model.eval()
-        self.patch_size = self.model.visual.patch_size
-
-    def forward(self, img):
-        features = self.model.get_patch_encodings(img).to(torch.float32)
-        return features
