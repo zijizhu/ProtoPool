@@ -123,13 +123,19 @@ def evaluate_distinctiveness(net: nn.Module,
         if hasattr(net, 'get_attn_maps'):
             _, batch_activations = net.get_attn_maps(images, targets)
         elif hasattr(net, 'push_forward'):
-            _, all_batch_activations = net.push_forward(images)
-            B, CK, H, W = all_batch_activations.shape
-            K = CK // num_classes
-            proto_indices = (targets * K).unsqueeze(dim=-1).repeat(1, K)
-            proto_indices += torch.arange(K).to(device=device)   # The indexes of prototypes belonging to the ground-truth class of each image
-            proto_indices = proto_indices[:, :, None, None].repeat(1, 1, H, W)
-            gt_batch_activations = torch.gather(all_batch_activations, 1, proto_indices) # (B, proto_per_class, fea_size, fea_size)
+            _, all_batch_activations, proto_presence = net.push_forward(images)
+            B, pool_size, H, W = all_batch_activations.shape
+
+            size = all_batch_activations.size(-1)
+            proto_presence_argmax = proto_presence.argmax(dim=1)  # shape: [c, k]
+            proto_indices = proto_presence_argmax[targets, :, None, None].repeat(1, 1, size, size)
+            gt_batch_activations = torch.gather(all_batch_activations, 1, proto_indices)
+            
+            K = proto_presence.size(-1)
+            # proto_indices = (targets * K).unsqueeze(dim=-1).repeat(1, K)
+            # proto_indices += torch.arange(K).to(device=device)   # The indexes of prototypes belonging to the ground-truth class of each image
+            # proto_indices = proto_indices[:, :, None, None].repeat(1, 1, H, W)
+            # gt_batch_activations = torch.gather(all_batch_activations, 1, proto_indices) # (B, proto_per_class, fea_size, fea_size)
 
             max_vals = F.adaptive_max_pool2d(gt_batch_activations, output_size=(1, 1,))
             topk_batch_activations = torch.gather(gt_batch_activations, 1, max_vals.topk(dim=1, k=min(topk, K)).indices.repeat(1, 1, H, W))
