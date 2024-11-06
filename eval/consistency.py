@@ -56,7 +56,7 @@ def get_corresponding_object_parts(ppnet, args, half_size, use_noise=False):
         fea_size = proto_acts.size(-1)
         proto_presence_argmax = proto_presence.argmax(dim=1)  # shape: [c, k]
         proto_indices = proto_presence_argmax[targets, :, None, None].repeat(1, 1, fea_size, fea_size)
-        proto_acts = torch.gather(proto_acts, 1, proto_indices).shape
+        proto_acts = torch.gather(proto_acts, 1, proto_indices)
         # Select the prototypes belonging to the ground-truth class of each image
         # fea_size = proto_acts.shape[-1]
         # proto_indices = (targets * proto_per_class).unsqueeze(dim=-1).repeat(1, proto_per_class)
