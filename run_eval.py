@@ -2,9 +2,12 @@ import os
 from pathlib import Path
 from model import PrototypeChooser
 import torch
+import sys
 import argparse
+import logging
 from eval.stability import evaluate_stability
 from eval.consistency import evaluate_consistency
+from eval.distinctiveness import evaluate_distinctiveness
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -68,8 +71,21 @@ if __name__ == "__main__":
     ppnet.img_size = int(args.input_size)
     ppnet.num_prototypes_per_class = int(args.num_descriptive)
 
+    log_dir = Path(args.resume).parent
+
     ppnet.to(device)
     ppnet.eval()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s][%(name)s][%(levelname)s] - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler((log_dir / f"evaluate_distinctiveness-{Path(args.resume).stem}.log").as_posix()),
+            logging.StreamHandler(sys.stdout),
+        ],
+        force=True,
+    )
 
     consistency_score = evaluate_consistency(ppnet, args, save_dir=output_path.as_posix())
     print('Consistency Score : {:.2f}%'.format(consistency_score))
@@ -80,3 +96,5 @@ if __name__ == "__main__":
     print('Stability Score : {:.2f}%'.format(stability_score))
     with open(output_path / filename, 'a') as fp:
         fp.write('Stability Score : {:.2f}%\n'.format(stability_score))
+
+    evaluate_distinctiveness(ppnet, save_path=log_dir, run_name=Path(args.resume).stem, device=device)

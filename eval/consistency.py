@@ -51,13 +51,18 @@ def get_corresponding_object_parts(ppnet, args, half_size, use_noise=False):
         if use_noise:   # This is used when calculating stability score
             data = perturb_img(data)
 
-        _, proto_acts = ppnet_without_ddp.push_forward(data)
+        _, proto_acts, proto_presence = ppnet_without_ddp.push_forward(data)
+
+        fea_size = proto_acts.size(-1)
+        proto_presence_argmax = proto_presence.argmax(dim=1)  # shape: [c, k]
+        proto_indices = proto_presence_argmax[targets, :, None, None].repeat(1, 1, fea_size, fea_size)
+        proto_acts = torch.gather(proto_acts, 1, proto_indices).shape
         # Select the prototypes belonging to the ground-truth class of each image
-        fea_size = proto_acts.shape[-1]
-        proto_indices = (targets * proto_per_class).unsqueeze(dim=-1).repeat(1, proto_per_class)
-        proto_indices += torch.arange(proto_per_class).to(device=device)   # The indexes of prototypes belonging to the ground-truth class of each image
-        proto_indices = proto_indices[:, :, None, None].repeat(1, 1, fea_size, fea_size)
-        proto_acts = torch.gather(proto_acts, 1, proto_indices) # (B, proto_per_class, fea_size, fea_size)
+        # fea_size = proto_acts.shape[-1]
+        # proto_indices = (targets * proto_per_class).unsqueeze(dim=-1).repeat(1, proto_per_class)
+        # proto_indices += torch.arange(proto_per_class).to(device=device)   # The indexes of prototypes belonging to the ground-truth class of each image
+        # proto_indices = proto_indices[:, :, None, None].repeat(1, 1, fea_size, fea_size)
+        # proto_acts = torch.gather(proto_acts, 1, proto_indices) # (B, proto_per_class, fea_size, fea_size)
 
         all_proto_acts.append(proto_acts.cpu().detach())
         all_targets.append(targets.cpu())

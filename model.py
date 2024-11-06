@@ -189,9 +189,13 @@ class PrototypeChooser(nn.Module):
             x = x.sum(dim=-1)
         return x, min_distances, proto_presence  # [b,c,n] [b, p] [c, p, n]
     
-    def push_forward(self, x):
+    def push_forward(self, x, gumbel_scale: int = 0):
+        if gumbel_scale == 0:
+            proto_presence = torch.softmax(self.proto_presence, dim=1)
+        else:
+            proto_presence = gumbel_softmax(self.proto_presence * gumbel_scale, dim=1, tau=0.5)
         distances = self.prototype_distances(x)
-        return None, self.distance_2_similarity(distances)
+        return None, self.distance_2_similarity(distances), proto_presence
 
 
     def _l2_convolution(self, x):
