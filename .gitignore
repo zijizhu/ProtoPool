@@ -1,0 +1,7 @@
+out/
+datasets/
+__pycache__
+*.pyc
+output*
+*.ipynb
+*.pyc

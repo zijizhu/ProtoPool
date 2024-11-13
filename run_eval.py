@@ -5,10 +5,12 @@ import torch
 import sys
 import argparse
 import logging
+from eval.accuracy import evaluate_accuracy
 from eval.stability import evaluate_stability
 from eval.consistency import evaluate_consistency
 from eval.distinctiveness import evaluate_distinctiveness
-    
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_set', default='CUB2011', type=str)
@@ -86,6 +88,8 @@ if __name__ == "__main__":
         ],
         force=True,
     )
+
+    evaluate_accuracy(net=ppnet, device=device)
 
     consistency_score = evaluate_consistency(ppnet, args, save_dir=output_path.as_posix())
     print('Consistency Score : {:.2f}%'.format(consistency_score))
