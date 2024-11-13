@@ -36,7 +36,7 @@ def evaluate_accuracy(net: nn.Module,
     net.to(device)
     net.eval()
 
-    mca = MulticlassAccuracy(num_classes=len(test_loader.dataset.classes), average="micro").to(device)
+    mca = MulticlassAccuracy(num_classes=200, average="micro").to(device)
     for b, batch in enumerate(tqdm(test_loader)):
         images, targets, img_ids = tuple(item.to(device=device) for item in batch)
         B, _, INPUT_H, INPUT_W = images.shape
