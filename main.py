@@ -212,7 +212,11 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     model.to(device)
     if args.warmup:
-        model.features.requires_grad_(False)
+        if 'dino' in str(model.features):
+            for param in model.features.parameters():
+                param.requires_grad = False
+        else:
+            model.features.requires_grad_(False)
         model.last_layer.requires_grad_(True)
         if args.ppnet_path:
             model.add_on_layers.requires_grad_(False)
@@ -278,7 +282,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
             gumbel_scalar = lambda1(epoch) if args.pp_gumbel else 0
 
             if args.warmup and args.warmup_time == epoch:
-                if str(model.features).upper().startswith("DINOV2"):
+                if 'dino' in str(model.features):
                     model.features.set_requires_grad()
                 else:
                     model.features.requires_grad_(True)

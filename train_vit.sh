@@ -8,7 +8,7 @@ python main.py \
     --num_classes 200 \
     --batch_size 80 \
     --lr 0.001 \
-    --epochs 8 \
+    --epochs 10 \
     --num_descriptive "$num" \
     --num_prototypes 202 \
     --results ./outputs \
@@ -17,7 +17,7 @@ python main.py \
     --arch "$arch" \
     --pretrained \
     --proto_depth 256 \
-    --warmup_time 4 \
+    --warmup_time 3 \
     --warmup \
     --prototype_activation_function log \
     --top_n_weight 0 \
@@ -26,7 +26,7 @@ python main.py \
     --mixup_data \
     --pp_ortho \
     --pp_gumbel \
-    --gumbel_time 30 \
+    --gumbel_time 3 \
     --data_train ./datasets/cub200_cropped/train_cropped_augmented/ \
     --data_push ./datasets/cub200_cropped/train_cropped/ \
     --data_test ./datasets/cub200_cropped/test_cropped/
