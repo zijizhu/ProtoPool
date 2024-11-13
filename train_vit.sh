@@ -8,16 +8,16 @@ python main.py \
     --num_classes 200 \
     --batch_size 80 \
     --lr 0.001 \
-    --epochs 20 \
+    --epochs 8 \
     --num_descriptive "$num" \
     --num_prototypes 202 \
     --results ./outputs \
-    --earlyStopping 20 \
+    --earlyStopping 8 \
     --use_scheduler \
     --arch "$arch" \
     --pretrained \
     --proto_depth 256 \
-    --warmup_time 10 \
+    --warmup_time 4 \
     --warmup \
     --prototype_activation_function log \
     --top_n_weight 0 \

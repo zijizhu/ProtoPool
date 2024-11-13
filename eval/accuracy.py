@@ -40,7 +40,7 @@ def evaluate_accuracy(net: nn.Module,
     for b, batch in enumerate(tqdm(test_loader)):
         images, targets, img_ids = tuple(item.to(device=device) for item in batch)
         B, _, INPUT_H, INPUT_W = images.shape
-        preds, min_distances, proto_presence = net(images)
+        preds, min_distances, proto_presence = net(images, gumbel_scale=10e3)
         mca(preds, targets)
     acc = mca.compute().item()
     logger.info(f"Eval accuracy: {acc:.4f}")
