@@ -8,15 +8,6 @@ import pandas as pd
 from torchvision.datasets.folder import default_loader
 from torch.utils.data import Dataset
 
-import numpy as np
-from PIL import Image
-from torchvision.datasets import ImageFolder
-import albumentations as A
-from albumentations import crop_keypoint_by_coords
-from pathlib import Path
-from torchvision.transforms.functional import to_tensor
-import torch.nn.functional as F
-
 
 def draw_point(img, point, bbox_size=10, color=(0, 0, 255)):
     img[point[1] - bbox_size // 2: point[1] + bbox_size // 2, point[0] - bbox_size // 2: point[0] + bbox_size // 2] = color
