@@ -201,6 +201,44 @@ def learn_model(opt: Optional[List[str]]) -> None:
         test_loader = torch.utils.data.DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
+    elif args.data_type.lower() == 'dogs':
+        from data import DogsDataset
+        img_size = 224
+        normalize = transforms.Normalize(mean=mean,std=std)
+        train_dataset = DogsDataset(
+            root="datasets", split="train",
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+        train_push_dataset = DogsDataset(
+            root="datasets", split="train",
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+        test_dataset = DogsDataset(
+            root="datasets", split="test",
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True,
+            **kwargs)
+        train_push_loader = torch.utils.data.DataLoader(
+            train_push_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
+            **kwargs)
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
+            **kwargs)
+        pass
     else:
         raise ValueError
 
@@ -502,9 +540,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
                 if epochs_no_improve > 5:
                     adjust_learning_rate(optimizer, 0.95)
 
-            if args.earlyStopping is not None and epochs_no_improve > args.earlyStopping:
-                logger.info('\033[1;31mEarly stopping!\033[0m')
-                break
+            # if args.earlyStopping is not None and epochs_no_improve > args.earlyStopping:
+            #     logger.info('\033[1;31mEarly stopping!\033[0m')
+            #     break
     ####################################
     #            push step             #
     ####################################
@@ -590,7 +628,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     logger.info('Fine-tuning')
     max_val_tst = 0
     min_val_loss = 10e5
-    for tune_epoch in range(20):
+    for tune_epoch in range(40):
         trn_loss = 0
         trn_tqdm = enumerate(train_loader, 0)
         model_multi.train()

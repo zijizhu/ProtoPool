@@ -10,7 +10,7 @@ python main.py \
     --num_classes "$num_classes" \
     --batch_size 80 \
     --lr 0.001 \
-    --epochs 50 \
+    --epochs 60 \
     --num_descriptive "$num" \
     --num_prototypes 202 \
     --results ./outputs \
@@ -28,7 +28,7 @@ python main.py \
     --mixup_data \
     --pp_ortho \
     --pp_gumbel \
-    --gumbel_time 10 \
+    --gumbel_time 30 \
     --data_train ./datasets/ \
     --data_push ./datasets/ \
     --data_test ./datasets/
