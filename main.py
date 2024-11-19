@@ -376,8 +376,11 @@ def learn_model(opt: Optional[List[str]]) -> None:
                         torch.t(model.prototype_class_identity).cuda()
                     l1 = (model.last_layer.weight * l1_mask).norm(p=1)
 
-                    loss = entropy_loss + clst_loss_val * clst_weight + \
-                        sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss 
+                    if args.data_type.lower() == 'cars':
+                        loss = entropy_loss + clst_loss_val * clst_weight + \
+                            sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss
+                    else:
+                        loss = entropy_loss + clst_loss_val * clst_weight + sep_loss_val * sep_weight
 
                     # ===================backward====================
                     optimizer.zero_grad()
@@ -442,7 +445,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     inverted_proto_presence = inverted_proto_presence[label_p]
                     clst_loss_val = dist_loss(model_multi.module, min_distances, proto_presence, args.num_descriptive) * clst_weight
                     sep_loss_val = dist_loss(model_multi.module, min_distances, inverted_proto_presence, args.num_prototypes - args.num_descriptive, sep=True) * sep_weight
-                    loss = entropy_loss + clst_loss_val + sep_loss_val + orthogonal_loss + 1e-4 * l1
+                    if args.data_type.lower() == 'cars':
+                        loss = entropy_loss + clst_loss_val + sep_loss_val + orthogonal_loss + 1e-4 * l1
+                    else:
+                        loss = entropy_loss + clst_loss_val * clst_weight + sep_loss_val * sep_weight
                     tst_loss += loss.item()
 
                     _, predicted = torch.max(prob, 1)
