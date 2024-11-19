@@ -276,7 +276,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
         format="[%(asctime)s][%(name)s][%(levelname)s] - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
-            logging.FileHandler((dir_checkpoint + "/" + "train.log").as_posix()),
+            logging.FileHandler(dir_checkpoint + "/" + "train.log"),
             logging.StreamHandler(sys.stdout),
         ],
         force=True,
