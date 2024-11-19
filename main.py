@@ -584,7 +584,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     logger.info('Fine-tuning')
     max_val_tst = 0
     min_val_loss = 10e5
-    for tune_epoch in range(5):
+    for tune_epoch in range(20):
         trn_loss = 0
         trn_tqdm = enumerate(train_loader, 0)
         model_multi.train()

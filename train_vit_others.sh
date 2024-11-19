@@ -19,7 +19,7 @@ python main.py \
     --arch "$arch" \
     --pretrained \
     --proto_depth 256 \
-    --warmup_time 15 \
+    --warmup_time 30 \
     --warmup \
     --prototype_activation_function log \
     --top_n_weight 0 \
@@ -28,7 +28,7 @@ python main.py \
     --mixup_data \
     --pp_ortho \
     --pp_gumbel \
-    --gumbel_time 15 \
+    --gumbel_time 30 \
     --data_train ./datasets/ \
     --data_push ./datasets/ \
     --data_test ./datasets/

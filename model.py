@@ -34,12 +34,12 @@ base_architecture_to_features = {'resnet18': resnet18_features,
                                  'vgg16_bn': vgg16_bn_features,
                                  'vgg19': vgg19_features,
                                  'vgg19_bn': vgg19_bn_features,
-                                 'dinov2_vits_exp': partial(DINOv2BackboneExpanded, name="dinov2_vits14_reg4", n_splits=3),
-                                 'dinov2_vitb_exp': partial(DINOv2BackboneExpanded, name="dinov2_vitb14_reg4", n_splits=3),
-                                 'dino_vits16': partial(DINOBackboneExpanded, name="dino_vits16", n_splits=3),
-                                 'dino_vits8': partial(DINOBackboneExpanded, name="dino_vits8", n_splits=3),
-                                 'dino_vitb16': partial(DINOBackboneExpanded, name="dino_vitb16", n_splits=3),
-                                 'dino_vitb8': partial(DINOBackboneExpanded, name="dino_vitb8", n_splits=3)}
+                                 'dinov2_vits_exp': partial(DINOv2BackboneExpanded, name="dinov2_vits14_reg4", n_splits=1),
+                                 'dinov2_vitb_exp': partial(DINOv2BackboneExpanded, name="dinov2_vitb14_reg4", n_splits=1),
+                                 'dino_vits16': partial(DINOBackboneExpanded, name="dino_vits16", n_splits=1),
+                                 'dino_vits8': partial(DINOBackboneExpanded, name="dino_vits8", n_splits=1),
+                                 'dino_vitb16': partial(DINOBackboneExpanded, name="dino_vitb16", n_splits=1),
+                                 'dino_vitb8': partial(DINOBackboneExpanded, name="dino_vitb8", n_splits=1)}
 
 
 class PrototypeChooser(nn.Module):
