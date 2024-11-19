@@ -2,10 +2,12 @@ import argparse
 import os
 from datetime import datetime
 from pathlib import Path
+import logging
 from typing import List, Optional
 
 import numpy as np
 import torch
+import sys
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
@@ -19,6 +21,7 @@ import cv2
 from utils import mixup_data, compute_proto_layer_rf_info_v2, compute_rf_prototype
 from eval.utils import mean, std
 
+logger = logging.getLogger(__name__)
 
 def save_model(model, path, epoch):
     torch.save({
@@ -34,7 +37,7 @@ def load_model(model, path, device):
         checkpoint = torch.load(path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
-    print(f'\033[0;32mLoad model form: {path}\033[0m')
+    logger.info(f'\033[0;32mLoad model form: {path}\033[0m')
     return model, checkpoint['epoch']
 
 
@@ -100,7 +103,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpuid[0]
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'\033[0;1;31m{device=}\033[0m')
+    logger.info(f'\033[0;1;31m{device=}\033[0m')
 
     start_val = 1.3
     end_val = 10 ** 3
@@ -217,7 +220,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     if args.ppnet_path:
         model.load_state_dict(torch.load(args.ppnet_path, map_location='cpu')[
                               'model_state_dict'], strict=True)
-        print('Successfully loaded ' + args.ppnet_path)
+        logger.info('Successfully loaded ' + args.ppnet_path)
 
     model.to(device)
     if args.warmup:
@@ -267,6 +270,17 @@ def learn_model(opt: Optional[List[str]]) -> None:
     Path(path_tensorboard).mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(path_tensorboard)
     dir_checkpoint = f'{args.results}/checkpoint/{info}'
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s][%(name)s][%(levelname)s] - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler((dir_checkpoint / "train.log").as_posix()),
+            logging.StreamHandler(sys.stdout),
+        ],
+        force=True,
+    )
     if args.proto_img_dir:
         proto_img_dir = f'{args.results}/img_proto/{info}'
         Path(proto_img_dir).mkdir(parents=True, exist_ok=True)
@@ -286,7 +300,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     model_multi = torch.nn.DataParallel(model)
 
     if not args.push_only:
-        print('Model learning')
+        logger.info('Model learning')
         for epoch in epoch_tqdm:
             gumbel_scalar = lambda1(epoch) if args.pp_gumbel else 0
 
@@ -299,7 +313,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                 lr_scheduler = torch.optim.lr_scheduler.StepLR(
                     optimizer, step_size=5, gamma=0.1)
                 steps = True
-                print("Warm up ends")
+                logger.info("Warm up ends")
 
             model.train()
             if (epoch + 1) % 8 == 0 and tau > 0.3:
@@ -456,7 +470,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
             if trn_loss is None:
                 trn_loss = loss.mean().detach()
                 trn_loss = trn_loss.cpu().numpy() / len(train_loader)
-            print(f'Epoch {epoch}|{args.epochs}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
+            logger.info(f'Epoch {epoch}|{args.epochs}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
                   f'| acc: {tst_acc:.5f}, orthogonal: {orthogonal_loss.item():.5f} '
                   f'(minimal test-loss: {min_val_loss:.5f}, early stop: {epochs_no_improve}|{args.earlyStopping}) - ')
 
@@ -482,12 +496,12 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     adjust_learning_rate(optimizer, 0.95)
 
             if args.earlyStopping is not None and epochs_no_improve > args.earlyStopping:
-                print('\033[1;31mEarly stopping!\033[0m')
+                logger.info('\033[1;31mEarly stopping!\033[0m')
                 break
     ####################################
     #            push step             #
     ####################################
-    print('Model push')
+    logger.info('Model push')
     model_multi.eval()
 
     ####################################
@@ -520,7 +534,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         tst_loss /= len(test_loader)
         tst_acc = tst_acc.item() / total
-    print(
+    logger.info(
         f'Before tuning, test loss: {tst_loss.mean():.5f} | acc: {tst_acc:.5f}')
 
     global_min_proto_dist = np.full(model_multi.module.num_prototypes, np.inf)
@@ -566,7 +580,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     # ===================fine tune=====================
 
-    print('Fine-tuning')
+    logger.info('Fine-tuning')
     max_val_tst = 0
     min_val_loss = 10e5
     for tune_epoch in range(5):
@@ -650,7 +664,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
         if trn_loss is None:
             trn_loss = loss.mean().detach()
             trn_loss = trn_loss.cpu().numpy() / len(train_loader)
-        print(f'Epoch {tune_epoch}|{5}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
+        logger.info(f'Epoch {tune_epoch}|{5}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
               f'| acc: {tst_acc:.5f}, (minimal test-loss: {min_val_loss:.5f}- ')
 
         ####################################
@@ -669,7 +683,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
             adjust_learning_rate(push_optimizer, 0.95)
 
     writer.close()
-    print('Finished training model. Have nice day :)')
+    logger.info('Finished training model. Have nice day :)')
 
 
 def dist_loss(model, min_distances, proto_presence, top_k, sep=False):
