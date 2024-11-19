@@ -270,6 +270,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     Path(path_tensorboard).mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(path_tensorboard)
     dir_checkpoint = f'{args.results}/checkpoint/{info}'
+    Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         level=logging.INFO,
@@ -284,7 +285,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     if args.proto_img_dir:
         proto_img_dir = f'{args.results}/img_proto/{info}'
         Path(proto_img_dir).mkdir(parents=True, exist_ok=True)
-    Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
+   
     
 
     ####################################
