@@ -10,7 +10,7 @@ python main.py \
     --num_classes "$num_classes" \
     --batch_size 80 \
     --lr 0.001 \
-    --epochs 40 \
+    --epochs 50 \
     --num_descriptive "$num" \
     --num_prototypes 202 \
     --results ./outputs \
@@ -19,7 +19,7 @@ python main.py \
     --arch "$arch" \
     --pretrained \
     --proto_depth 256 \
-    --warmup_time 30 \
+    --warmup_time 10 \
     --warmup \
     --prototype_activation_function log \
     --top_n_weight 0 \
@@ -28,7 +28,7 @@ python main.py \
     --mixup_data \
     --pp_ortho \
     --pp_gumbel \
-    --gumbel_time 30 \
+    --gumbel_time 10 \
     --data_train ./datasets/ \
     --data_push ./datasets/ \
     --data_test ./datasets/
