@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 from utils import mixup_data, compute_proto_layer_rf_info_v2, compute_rf_prototype
-
+from eval.utils import mean, std
 
 
 def save_model(model, path, epoch):
@@ -45,7 +45,7 @@ def adjust_learning_rate(optimizer, rate):
 
 def learn_model(opt: Optional[List[str]]) -> None:
     parser = argparse.ArgumentParser(description='PrototypeGraph')
-    parser.add_argument('--data_type', default='birds', choices=['birds', 'cars'])
+    parser.add_argument('--data_type', default='birds', choices=['birds', 'cars', 'dogs'])
     parser.add_argument('--data_train', help='Path to train data')
     parser.add_argument('--data_push', help='Path to push data')
     parser.add_argument('--data_test', help='Path to tets data')
@@ -162,30 +162,39 @@ def learn_model(opt: Optional[List[str]]) -> None:
             test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
 
-    elif args.data_type == 'cars':
-        train_dataset = datasets.ImageFolder(
-            args.data_train,
-#            '/shared/sets/datasets/stanford_cars/train_cars_augmented/',
-            transforms_train_test,
+    elif args.data_type.lower() == 'cars':
+        img_size = 224
+        normalize = transforms.Normalize(mean=mean,std=std)
+        train_dataset = datasets.StanfordCars(
+            args.data_train, split="train", download=False,
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+        train_push_dataset = datasets.StanfordCars(
+            args.data_push, split="train", download=False,
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
+        )
+        test_dataset = datasets.StanfordCars(
+            args.data_test, split="test", download=False,
+            transform= transforms.Compose([
+                transforms.Resize(size=(img_size, img_size)),
+                transforms.ToTensor(),
+                normalize,
+            ])
         )
         train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True,
             **kwargs)
-
-        train_push_dataset = datasets.ImageFolder(
-            args.data_push,
-#            '/shared/sets/datasets/stanford_cars/train_cars/',
-            transforms_push,
-        )
         train_push_loader = torch.utils.data.DataLoader(
             train_push_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
-
-        test_dataset = datasets.ImageFolder(
-            args.data_test,
-#            '/shared/sets/datasets/stanford_cars/test_cars/',
-            transforms_train_test,
-        )
         test_loader = torch.utils.data.DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
